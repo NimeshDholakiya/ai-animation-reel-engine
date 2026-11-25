@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Animation & Video Pipeline Simulator | By Nimesh Dholakiya</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
+  </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center">
+  <div class="max-w-4xl w-full space-y-6">
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between pb-6 border-b border-gray-800 gap-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Open Source</span>
+          <span class="text-xs text-gray-400">v1.0.0</span>
+        </div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-white mt-1">AI Animation & Toon Video Simulator</h1>
+        <p class="text-sm text-gray-400 mt-1">Interactive architecture visualizer comparing Pure AI (Lemon/Kling), 3D Engine (Blender), and Hybrid Pipelines.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="https://github.com/NimeshDholakiya" target="_blank" class="px-3.5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs font-semibold text-gray-200 border border-gray-700 flex items-center gap-2 transition-all">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub Profile
+        </a>
+      </div>
+    </header>
+
+    <!-- Pipeline Mode Switcher -->
+    <div class="flex flex-wrap items-center justify-between gap-3 bg-gray-900/60 p-2 rounded-xl border border-gray-800">
+      <div class="flex gap-2">
+        <button id="btn-mode-ai" onclick="switchMode('ai')" class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium text-xs transition-all shadow-sm">1. Pure AI (Lemon / Kling)</button>
+        <button id="btn-mode-blender" onclick="switchMode('blender')" class="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white font-medium text-xs transition-all">2. 3D Engine (Blender)</button>
+        <button id="btn-mode-hybrid" onclick="switchMode('hybrid')" class="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white font-medium text-xs transition-all">3. Hybrid Pro (Recommended)</button>
+      </div>
+      <button id="btn-run" onclick="simulateRun()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all shadow-sm">
+        <span>▶ Run Simulation</span>
+      </button>
+    </div>
+
+    <!-- Active Pipeline Stage Visualizer -->
+    <div class="bg-gray-900/80 border border-gray-800 rounded-2xl p-5 space-y-4 shadow-xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-semibold text-gray-200" id="mode-title">Pipeline: Pure AI Diffusion (Text/Image to Video)</h3>
+        <span class="text-xs font-mono text-gray-500" id="clock-display">Status: Ready</span>
+      </div>
+
+      <!-- Step Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-center" id="steps-container">
+        <div id="step-1" class="border border-gray-800 rounded-xl p-3 bg-gray-950/50 transition-all">
+          <div class="font-bold text-indigo-400 text-xs">Step 1: Input</div>
+          <div class="text-[11px] text-gray-400 mt-1 min-h-[32px]" id="step-1-desc">Text Prompt + Seed Image</div>
+          <div class="mt-2 text-[10px] font-mono py-1 rounded bg-gray-900 border border-gray-800 text-gray-500" id="step-1-status">Idle</div>
+        </div>
+
+        <div id="step-2" class="border border-gray-800 rounded-xl p-3 bg-gray-950/50 transition-all">
+          <div class="font-bold text-indigo-400 text-xs">Step 2: Latent Denoise</div>
+          <div class="text-[11px] text-gray-400 mt-1 min-h-[32px]" id="step-2-desc">Diffusion Transformer (DiT)</div>
+          <div class="mt-2 text-[10px] font-mono py-1 rounded bg-gray-900 border border-gray-800 text-gray-500" id="step-2-status">Idle</div>
+        </div>
+
+        <div id="step-3" class="border border-gray-800 rounded-xl p-3 bg-gray-950/50 transition-all">
+          <div class="font-bold text-indigo-400 text-xs">Step 3: Temporal Motion</div>
+          <div class="text-[11px] text-gray-400 mt-1 min-h-[32px]" id="step-3-desc">Frame-to-Frame Attention</div>
+          <div class="mt-2 text-[10px] font-mono py-1 rounded bg-gray-900 border border-gray-800 text-gray-500" id="step-3-status">Idle</div>
+        </div>
+
+        <div id="step-4" class="border border-gray-800 rounded-xl p-3 bg-gray-950/50 transition-all">
+          <div class="font-bold text-indigo-400 text-xs">Step 4: Output Video</div>
+          <div class="text-[11px] text-gray-400 mt-1 min-h-[32px]" id="step-4-desc">VAE Frame Decode + Audio Sync</div>
+          <div class="mt-2 text-[10px] font-mono py-1 rounded bg-gray-900 border border-gray-800 text-gray-500" id="step-4-status">Idle</div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="w-full bg-gray-950 rounded-full h-2 overflow-hidden border border-gray-800">
+        <div id="sim-progress" class="bg-gradient-to-r from-indigo-500 to-emerald-500 h-full w-0 transition-all duration-300"></div>
+      </div>
+
+      <!-- Execution Console Log -->
+      <div class="bg-black/60 border border-gray-800 rounded-xl p-3 font-mono text-[11px] space-y-1 max-h-28 overflow-y-auto" id="console-log">
+        <div class="text-gray-500">> System loaded. Select a pipeline mode and click "Run Simulation".</div>
+      </div>
+
+      <!-- Deliverable Card -->
+      <div class="p-4 rounded-xl border border-gray-800 bg-gray-950/70 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="font-bold text-white text-xs flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Final Output Deliverable Specs
+          </span>
+          <span class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" id="out-format">Format: 1080x1920 MP4 (9:16)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800/80">
+            <div class="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">What You Get:</div>
+            <div class="font-bold text-gray-200 mt-0.5" id="out-what">Raw 4-5s Video Clips</div>
+            <div class="text-gray-400 text-[11px] mt-1" id="out-desc">Individual clips that require timeline arrangement in CapCut.</div>
+          </div>
+          <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800/80">
+            <div class="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Quality & Stability:</div>
+            <div class="font-bold text-gray-200 mt-0.5" id="out-score">7.5 / 10 (Fast, but glitch-prone)</div>
+            <div class="text-gray-400 text-[11px] mt-1" id="out-diag">Watch out for melted fingers and morphing facial features.</div>
+          </div>
+          <div class="bg-gray-900/60 p-3 rounded-lg border border-gray-800/80">
+            <div class="text-gray-400 text-[10px] uppercase tracking-wider font-semibold">Next Step To Publish:</div>
+            <div class="font-bold text-gray-200 mt-0.5" id="out-next">Assemble in CapCut</div>
+            <div class="text-gray-400 text-[11px] mt-1">Add sound design, whooshes, Hindi/English voice, and auto-captions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparative Matrix -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+        <h4 class="font-bold text-white text-xs flex items-center gap-2">
+          <span>🎯</span> Character Consistency
+        </h4>
+        <p class="text-gray-400 text-xs mt-2" id="matrix-consistency">AI tools hallucinate 5-15% pixel drift per cut. Best for quick 1-off clips, harder for continuous multi-episode series.</p>
+      </div>
+
+      <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+        <h4 class="font-bold text-white text-xs flex items-center gap-2">
+          <span>👄</span> Lip-Sync & Physics
+        </h4>
+        <p class="text-gray-400 text-xs mt-2" id="matrix-physics">Learned statistical physics. Can cause morphing objects or extra fingers if motion is too sudden.</p>
+      </div>
+
+      <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+        <h4 class="font-bold text-white text-xs flex items-center gap-2">
+          <span>💰</span> Production Cost
+        </h4>
+        <p class="text-gray-400 text-xs mt-2" id="matrix-cost">Cloud credit based. Free tier gives 5-10 renders/day; paid subs ($15-$60/mo) required for heavy series.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="pt-6 border-t border-gray-800 text-center text-xs text-gray-500">
+      Built for creators looking to produce high-retention AI & Toon Reels. Repository maintained by <a href="https://github.com/NimeshDholakiya" class="text-indigo-400 hover:underline">Nimesh Dholakiya</a>.
+    </footer>
+  </div>
+
+  <script>
+    let currentMode = 'ai';
+    const modes = {
+      ai: {
+        title: 'Pipeline: Pure AI Diffusion (Lemon Slice, Kling, Luma)',
+        step1: ['Prompt + Initial Latent', 'CLIP text embedding + Seed image tokens'],
+        step2: ['Diffusion Transformer', 'Iterative denoising over 25-50 steps in latent space'],
+        step3: ['Temporal Attention', 'Calculates optical flow & motion vectors between frames'],
+        step4: ['Video VAE Decode', 'Decodes 24fps MP4 with automated wav2lip audio pass'],
+        consistency: 'AI tools hallucinate 5-15% pixel drift per cut. Best for quick 1-off clips, harder for continuous multi-episode series.',
+        physics: 'Learned statistical physics. Can cause morphing objects or extra fingers if motion is too sudden.',
+        cost: 'Cloud credit based. Free tier gives 5-10 renders/day; paid subs ($15-$60/mo) required for heavy series.',
+        output: {
+          format: '1080x1920 MP4 (H.264, 24fps)',
+          what: '3 to 5 Raw AI Video Clips',
+          desc: 'Individual 4s clips. Faces look good in isolation, but will morph slightly if cut together.',
+          score: '7.5 / 10 (Fastest, but glitch-prone)',
+          diag: 'Watch out for melted fingers, drifting earrings, and warping background textures.',
+          next: 'Import into CapCut to cut out distorted frames and overlay voiceover.'
+        }
+      },
+      blender: {
+        title: 'Pipeline: 3D Animation Engine (Blender + Mixamo)',
+        step1: ['3D Rigged Asset', 'VRoid/Mixamo character skeleton loaded in scene'],
+        step2: ['Mocap / Rig Animation', 'Keyframes & motion clips applied directly to bones'],
+        step3: ['NPR Toon Shading', 'Eevee ColorRamp separates light into flat 2D anime bands'],
+        step4: ['Eevee Frame Render', 'Zero hallucination, 100% exact character consistency'],
+        consistency: '100% Perfect. The character model, clothes, and colors never change unexpectedly across 100+ episodes.',
+        physics: 'True 3D physics, collision geometry, and precise Rhubarb syllable-by-syllable lip sync.',
+        cost: '100% Free & Open Source forever. No subscriptions or credit limits.',
+        output: {
+          format: '1080x1920 PNG Sequence or MP4',
+          what: 'Full Scene Multi-Camera Render',
+          desc: 'Flawless 3D character with clean 2D anime cell-shading and zero frame artifacts.',
+          score: '9.8 / 10 (Studio-Grade Consistency)',
+          diag: 'Zero morphing. Physics and character silhouette stay 100% identical forever.',
+          next: 'Directly drop audio track into Blender Video Sequencer or export to CapCut.'
+        }
+      },
+      hybrid: {
+        title: 'Pipeline: The Pro Hybrid Formula (AI Keyframes + 3D/Compositing)',
+        step1: ['AI Concept Art', 'Midjourney/FLUX defines the unique visual character style'],
+        step2: ['3D Skeleton Matching', 'Rough Blender/Mixamo body proxy ensures stable motion'],
+        step3: ['AI Video-to-Video Pass', 'Feeds 3D render into Lemon/Kling/Domo to skin cartoon art'],
+        step4: ['CapCut Final Polish', 'Dynamic sound effects, J-cuts, and bold multi-lingual subs'],
+        consistency: 'Maximum. The 3D bones prevent AI morphing while AI gives rich stylized hand-drawn art.',
+        physics: 'Best of both worlds: Studio-tier anime motion with automated facial acting.',
+        cost: 'Low/Balanced. Free Blender foundation + minimal AI credit consumption.',
+        output: {
+          format: 'Master 1080x1920 Pro Video Package',
+          what: 'Styled Anime Clips with 3D Stability',
+          desc: 'High-end viral look. Complex hand-drawn aesthetic guided by 3D bone motion.',
+          score: '9.5 / 10 (Highest Viral Engagement)',
+          diag: 'Looks like high-budget anime without hiring a 20-person animation studio.',
+          next: 'Add sound effects (whoosh, hit), dynamic captions, and post to Instagram.'
+        }
+      }
+    };
+
+    function switchMode(mode) {
+      currentMode = mode;
+      ['ai', 'blender', 'hybrid'].forEach(m => {
+        const btn = document.getElementById('btn-mode-' + m);
+        if (m === mode) {
+          btn.className = 'px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium text-xs transition-all shadow-sm';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white font-medium text-xs transition-all';
+        }
+      });
+
+      const data = modes[mode];
+      document.getElementById('mode-title').innerText = data.title;
+      document.getElementById('step-1-desc').innerText = data.step1[1];
+      document.getElementById('step-2-desc').innerText = data.step2[1];
+      document.getElementById('step-3-desc').innerText = data.step3[1];
+      document.getElementById('step-4-desc').innerText = data.step4[1];
+
+      document.getElementById('matrix-consistency').innerText = data.consistency;
+      document.getElementById('matrix-physics').innerText = data.physics;
+      document.getElementById('matrix-cost').innerText = data.cost;
+
+      document.getElementById('out-format').innerText = 'Format: ' + data.output.format;
+      document.getElementById('out-what').innerText = data.output.what;
+      document.getElementById('out-desc').innerText = data.output.desc;
+      document.getElementById('out-score').innerText = data.output.score;
+      document.getElementById('out-diag').innerText = data.output.diag;
+      document.getElementById('out-next').innerText = data.output.next;
+
+      resetSim();
+      log(`> Switched configuration to: ${data.title}`);
+    }
+
+    function log(msg) {
+      const c = document.getElementById('console-log');
+      const div = document.createElement('div');
+      div.innerText = msg;
+      c.appendChild(div);
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function resetSim() {
+      for (let i = 1; i <= 4; i++) {
+        const s = document.getElementById(`step-${i}`);
+        s.className = 'border border-gray-800 rounded-xl p-3 bg-gray-950/50 transition-all';
+        const st = document.getElementById(`step-${i}-status`);
+        st.innerText = 'Idle';
+        st.className = 'mt-2 text-[10px] font-mono py-1 rounded bg-gray-900 border border-gray-800 text-gray-500';
+      }
+      document.getElementById('sim-progress').style.width = '0%';
+    }
+
+    async function simulateRun() {
+      const btn = document.getElementById('btn-run');
+      btn.disabled = true;
+      resetSim();
+      log('> Initializing pipeline execution...');
+
+      const steps = [
+        { id: 1, name: modes[currentMode].step1[0], time: 600, pct: 25 },
+        { id: 2, name: modes[currentMode].step2[0], time: 800, pct: 50 },
+        { id: 3, name: modes[currentMode].step3[0], time: 800, pct: 75 },
+        { id: 4, name: modes[currentMode].step4[0], time: 600, pct: 100 }
+      ];
+
+      for (const step of steps) {
+        const el = document.getElementById(`step-${step.id}`);
+        const status = document.getElementById(`step-${step.id}-status`);
+        el.className = 'border border-indigo-500 rounded-xl p-3 bg-gray-900 shadow-lg transition-all';
+        status.innerText = 'Processing...';
+        status.className = 'mt-2 text-[10px] font-mono py-1 rounded bg-indigo-600 text-white animate-pulse';
+        log(`[Step ${step.id}] Executing: ${step.name}`);
+
+        await new Promise(r => setTimeout(r, step.time));
+
+        status.innerText = 'Completed ✓';
+        status.className = 'mt-2 text-[10px] font-mono py-1 rounded bg-emerald-600 text-white';
+        document.getElementById('sim-progress').style.width = step.pct + '%';
+      }
+
+      log('> Execution completed. Deliverable ready for inspection.');
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
